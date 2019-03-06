@@ -1,0 +1,47 @@
+#!/bin/sh
+# Copyright 2019 Alkis Georgopoulos <github.com/alkisg>
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Create a live USB pendrive.
+# You're supposed to have both grub-pc-bin and grub-efi-amd64-signed
+# to be able to run this script.
+
+# The minimum size for a fat32 partition is around 260 MiB
+rm -f liveusb.img
+truncate -s 300M liveusb.img
+parted liveusb.img <<EOF
+mklabel msdos
+mkpart primary fat32 1 -0
+toggle 1 boot
+quit
+EOF
+sudo losetup /dev/loop5 liveusb.img
+sudo partprobe /dev/loop5
+sudo mkfs.fat -F32 -v -i $(date "+%Y%m%d") -n LIVEUSB /dev/loop5p1
+sudo mkdir -p /tmp/liveusb
+sudo mount /dev/loop5p1 /tmp/liveusb
+# grub-install creates EFI/Boot directories, use lowercase in advance
+mkdir -p /tmp/liveusb/efi/boot
+sudo grub-install --target=i386-pc --boot-directory=/tmp/liveusb /dev/loop5
+sudo grub-install --target=x86_64-efi --uefi-secure-boot --efi-directory=/tmp/liveusb --boot-directory=/tmp/liveusb /dev/loop5
+sudo cp grub.cfg /tmp/liveusb/grub/
+sudo mkdir /tmp/liveusb/liveusb
+cd /tmp/liveusb/liveusb
+sudo mkdir -p efi linux16 memdisk software ubuntu
+# Ordered by target name
+sudo wget -nv "https://boot.ipxe.org/ipxe.efi" -O efi/ipxe.efi
+sudo wget -nv "https://github.com/tianocore/edk2/raw/master/ShellBinPkg/UefiShell/X64/Shell.efi" -O efi/shellx64.efi
+sudo wget -nv "https://boot.ipxe.org/ipxe.lkrn" -O linux16/ipxe.lkrn
+sudo cp /boot/memtest86+.bin linux16/memtest86+.bin
+sudo wget -nv "https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/boot.img" -O memdisk/dos.img
+sudo cp /usr/lib/syslinux/memdisk memdisk/memdisk
+sudo wget -nv "http://ftp.debian.org/debian/tools/win32-loader/stable/win32-loader.exe" -O software/win32-loader.exe
+cd -
+sudo umount /tmp/liveusb
+sudo losetup -d /dev/loop5
+sudo delpart /dev/loop5 1
+zip liveusb.zip liveusb.img || 7z a liveusb.zip liveusb.img
+
+echo "Successfully created liveusb.img and liveusb.zip. Write it with:
+  sudo umount /dev/sdx*
+  sudo dd if=liveusb.img of=/dev/sdx bs=1M status=progress
+Replace 'x' in sdx with the actual drive."
