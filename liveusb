@@ -1,9 +1,12 @@
 #!/bin/sh
-# Copyright 2019 Alkis Georgopoulos <github.com/alkisg>
+# Copyright 2019-2020 Alkis Georgopoulos <github.com/alkisg>
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Create a live USB pendrive.
-# You're supposed to have both grub-pc-bin and grub-efi-amd64-signed
-# to be able to run this script.
+# Create a live USB flash drive.
+# Install grub-pc-bin (for BIOS), grub-efi-amd64-signed (for UEFI) and
+# shim-signed (for secure boot) before running this script.
+
+# Abort on errors
+set -e
 
 # The minimum size for a fat32 partition is around 260 MiB
 rm -f liveusb.img
@@ -16,25 +19,25 @@ quit
 EOF
 sudo losetup /dev/loop5 liveusb.img
 sudo partprobe /dev/loop5
-sudo mkfs.fat -F32 -v -i $(date "+%Y%m%d") -n LIVEUSB /dev/loop5p1
+# 1973 is used as a liveusb identifier, the rest is the liveusb version
+sudo mkfs.fat -F32 -v -i $(date "+1973%y%m") -n LIVEUSB /dev/loop5p1
 sudo mkdir -p /tmp/liveusb
 sudo mount /dev/loop5p1 /tmp/liveusb
 # grub-install creates EFI/Boot directories, use lowercase in advance
-mkdir -p /tmp/liveusb/efi/boot
+sudo mkdir -p /tmp/liveusb/efi/boot
 sudo grub-install --target=i386-pc --boot-directory=/tmp/liveusb /dev/loop5
 sudo grub-install --target=x86_64-efi --uefi-secure-boot --efi-directory=/tmp/liveusb --boot-directory=/tmp/liveusb /dev/loop5
-sudo cp grub.cfg /tmp/liveusb/grub/
+sudo cp --preserve=timestamps grub.cfg /tmp/liveusb/grub/
 sudo mkdir /tmp/liveusb/liveusb
 cd /tmp/liveusb/liveusb
-sudo mkdir -p efi linux16 memdisk software ubuntu
+sudo mkdir -p clonezilla debian efi fedora kali linux16 manjaro memdisk opensuse ubuntu
 # Ordered by target name
 sudo wget -nv "https://boot.ipxe.org/ipxe.efi" -O efi/ipxe.efi
-sudo wget -nv "https://github.com/tianocore/edk2/raw/master/ShellBinPkg/UefiShell/X64/Shell.efi" -O efi/shellx64.efi
+sudo wget -nv "https://github.com/tianocore/edk/raw/master/Other/Maintained/Application/UefiShell/bin/x64/Shell.efi" -O efi/shellx64.efi
 sudo wget -nv "https://boot.ipxe.org/ipxe.lkrn" -O linux16/ipxe.lkrn
-sudo cp /boot/memtest86+.bin linux16/memtest86+.bin
+sudo cp --preserve=timestamps /boot/memtest86+.bin linux16/memtest86+.bin
 sudo wget -nv "https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/boot.img" -O memdisk/dos.img
-sudo cp /usr/lib/syslinux/memdisk memdisk/memdisk
-sudo wget -nv "http://ftp.debian.org/debian/tools/win32-loader/stable/win32-loader.exe" -O software/win32-loader.exe
+sudo cp --preserve=timestamps /usr/lib/syslinux/memdisk memdisk/memdisk
 cd -
 sudo umount /tmp/liveusb
 sudo losetup -d /dev/loop5
