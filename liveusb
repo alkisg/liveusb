@@ -42,6 +42,7 @@ cd -
 sudo umount /tmp/liveusb
 sudo losetup -d /dev/loop5
 sudo delpart /dev/loop5 1
+rm -f liveusb.zip
 zip liveusb.zip liveusb.img || 7z a liveusb.zip liveusb.img
 
 echo "Successfully created liveusb.img and liveusb.zip. Write it with:
