@@ -1,6 +1,6 @@
 # liveusb
 
-![liveusb](https://github.com/alkisg/liveusb/raw/master/liveusb.png)
+![liveusb](https://github.com/alkisg/liveusb/raw/main/liveusb.png)
 
 This project allows you to create a grub2-based USB flash drive with the following boot options that work under **both** BIOS and UEFI firmwares:
  * Various Linux live CDs directly in .iso format
@@ -8,7 +8,7 @@ This project allows you to create a grub2-based USB flash drive with the followi
  * Boot from network, using iPXE
  * Memory test
 
-The main idea is that you download [liveusb.zip](https://github.com/alkisg/liveusb/raw/master/liveusb.zip), extract it to get a 300 MiB fat32 image named liveusb.img, and then write that image to your drive. Finally, you resize the partition to fill the free space.
+The main idea is that you download [liveusb.zip](https://github.com/alkisg/liveusb/raw/main/liveusb.zip), extract it to get a 300 MiB fat32 image named liveusb.img, and then write that image to your drive. Finally, you resize the partition to fill the free space.
 
 Initially, the liveusb can only boot from the network and do a memory test. You're supposed to manually add the linux-distributions.iso and the Windows files later on.
 
@@ -17,7 +17,7 @@ Initially, the liveusb can only boot from the network and do a memory test. You'
 To create the liveusb drive under Linux, run the following commands, while replacing sdx with your actual device:
 
 ```shell
-wget -nv https://github.com/alkisg/liveusb/raw/master/liveusb.zip
+wget -nv https://github.com/alkisg/liveusb/raw/main/liveusb.zip
 unzip liveusb.zip
 sudo umount /dev/sdx*
 sudo dd if=liveusb.img of=/dev/sdx bs=1M status=progress
@@ -30,7 +30,7 @@ Resize the /dev/sdx1 partition to fill the free space and close gparted.
 
 ## Windows instructions
 
-Download [liveusb.zip](https://github.com/alkisg/liveusb/raw/master/liveusb.zip) and unzip it to get liveusb.img.
+Download [liveusb.zip](https://github.com/alkisg/liveusb/raw/main/liveusb.zip) and unzip it to get liveusb.img.
 
 Then download [Rufus](https://rufus.ie/) and use it to write liveusb.img to a USB flash drive.
 
@@ -38,9 +38,9 @@ Finally, use [EaseUS Partition Master Free](https://www.easeus.com/partition-man
 
 ## Add the Linux .iso files
 
-Download your favorite distribution .iso, for example [ubuntu-mate-20.04-desktop-amd64.iso](http://cdimage.ubuntu.com/ubuntu-mate/releases/20.04/release/ubuntu-mate-20.04-desktop-amd64.iso), and put it in the appropriate folder in the USB flash drive, for example in `/liveusb/ubuntu/ubuntu-mate-20.04-desktop-amd64.iso`.
+Download your favorite distribution .iso, for example [ubuntu-mate-20.04.2.0-desktop-amd64.iso](http://cdimage.ubuntu.com/ubuntu-mate/releases/20.04/release/ubuntu-mate-20.04.2.0-desktop-amd64.iso), and put it in the appropriate folder in the USB flash drive, for example in `/liveusb/ubuntu/ubuntu-mate-20.04.2.0-desktop-amd64.iso`.
 
-The following distributions are currently supported: clonezilla, debian, fedora, kali, manjaro, opensuse, ubuntu.
+The following distributions are currently supported: antix, clonezilla, debian, fedora, kali, manjaro, opensuse, ubuntu.
 
 To select the live session language or to pass custom kernel parameters you can create a `/grub/local.cfg` file similar to [this one](local.cfg).
 
@@ -78,5 +78,5 @@ Liveusb is created by running the [liveusb script](liveusb) in my own PC. You ca
     ├── memdisk
     │   └── dos.img  # BIOS: DOS, for BIOS flashing etc
     └── ubuntu
-        └── ubuntu-mate-20.04.1-desktop-amd64.iso  # YOU: Ubuntu live CDs
+        └── ubuntu-mate-20.04.2.0-desktop-amd64.iso  # YOU: Ubuntu live CDs
 ```
